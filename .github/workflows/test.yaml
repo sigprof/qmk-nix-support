@@ -8,9 +8,9 @@ jobs:
   test:
     strategy:
       matrix:
-        branch:
-          - master
-          # develop
+        source:
+          - { repo: "qmk/qmk_firmware", branch: "master" }
+          - { repo: "sigprof/qmk_firmware", branch: "nix-shell-updates" }
         nixPath:
           - nixpkgs=channel:nixos-20.09
           # nixpkgs=channel:nixos-unstable
@@ -32,11 +32,11 @@ jobs:
           name: ${{ secrets.CACHIX_NAME }}
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
 
-      - name: Checkout the 'qmk_firmware' repository
+      - name: Checkout the QMK source code
         uses: actions/checkout@v2.3.4
         with:
-          repository: qmk/qmk_firmware
-          ref: ${{ matrix.branch }}
+          repository: ${{ matrix.source.repo }}
+          ref: ${{ matrix.source.branch }}
           submodules: recursive
 
       - name: Update submodules
