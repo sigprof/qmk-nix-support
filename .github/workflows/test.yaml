@@ -46,21 +46,16 @@ jobs:
         run: nix-shell --run 'true'
 
       - name: Test AVR build using 'make'
-        continue-on-error: true
         run: nix-shell --run 'make planck/rev5:default'
 
       - name: Test Arm build using 'make'
-        continue-on-error: true
         run: nix-shell --run 'make planck/rev6:default'
 
       - name: Test 'qmk clean'
-        continue-on-error: true
         run: nix-shell --run 'qmk clean'
 
       - name: Test AVR build using 'qmk compile'
-        continue-on-error: true
         run: nix-shell --run 'qmk compile -kb planck/rev5 -km default'
 
       - name: Test Arm build using 'qmk compile'
-        continue-on-error: true
         run: nix-shell --run 'qmk compile -kb planck/rev6 -km default'
