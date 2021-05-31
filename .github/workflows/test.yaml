@@ -43,25 +43,33 @@ jobs:
         run: make git-submodule
 
       - name: Build the Nix shell environment
+        id: nix_shell
         run: nix-shell --run 'true'
 
       - name: Test AVR build using 'make'
+        if: ${{ always() && (steps.nix_shell.outcome == 'success') }}
         run: nix-shell --run 'make planck/rev5:default'
 
       - name: Test Arm build using 'make'
+        if: ${{ always() && (steps.nix_shell.outcome == 'success') }}
         run: nix-shell --run 'make planck/rev6:default'
 
       - name: Test 'make clean'
+        if: ${{ always() && (steps.nix_shell.outcome == 'success') }}
         run: nix-shell --run 'make clean'
 
       - name: Force clean before testing 'qmk compile'
+        if: ${{ always() && (steps.nix_shell.outcome == 'success') }}
         run: git clean -fdx
 
       - name: Test AVR build using 'qmk compile'
+        if: ${{ always() && (steps.nix_shell.outcome == 'success') }}
         run: nix-shell --run 'qmk compile -kb planck/rev5 -km default'
 
       - name: Test Arm build using 'qmk compile'
+        if: ${{ always() && (steps.nix_shell.outcome == 'success') }}
         run: nix-shell --run 'qmk compile -kb planck/rev6 -km default'
 
       - name: Test 'qmk clean'
+        if: ${{ always() && (steps.nix_shell.outcome == 'success') }}
         run: nix-shell --run 'qmk clean'
