@@ -1,0 +1,63 @@
+name: Test Nix shell
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '35 4 * * *'
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        branch:
+          - master
+          # develop
+        nixPath:
+          - nixpkgs=channel:nixos-20.09
+          # nixpkgs=channel:nixos-unstable
+      fail-fast: false
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Nix
+        uses: cachix/install-nix-action@v13
+        with:
+          nix_path: "${{ matrix.nixPath }}"
+
+      - name: Show nixpkgs version
+        run: nix-instantiate --eval -E '(import <nixpkgs> {}).lib.version'
+
+      - name: Setup Cachix
+        uses: cachix/cachix-action@v10
+        with:
+          name: ${{ secrets.CACHIX_NAME }}
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+
+      - name: Checkout the 'qmk_firmware' repository
+        uses: actions/checkout@v2.3.4
+        with:
+          repository: qmk/qmk_firmware
+          ref: ${{ matrix.branch }}
+          submodules: recursive
+
+      - name: Update submodules
+        run: make git-submodule
+
+      - name: Test AVR build using 'make'
+        continue-on-error: true
+        run: nix-shell --run 'make planck/rev5:default'
+
+      - name: Test Arm build using 'make'
+        continue-on-error: true
+        run: nix-shell --run 'make planck/rev6:default'
+
+      - name: Test 'qmk clean'
+        continue-on-error: true
+        run: nix-shell --run 'qmk clean'
+
+      - name: Test AVR build using 'qmk compile'
+        continue-on-error: true
+        run: nix-shell --run 'qmk compile -kb planck/rev5 -km default'
+
+      - name: Test Arm build using 'qmk compile'
+        continue-on-error: true
+        run: nix-shell --run 'qmk compile -kb planck/rev6 -km default'
