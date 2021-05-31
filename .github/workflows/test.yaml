@@ -54,6 +54,9 @@ jobs:
       - name: Test 'make clean'
         run: nix-shell --run 'make clean'
 
+      - name: Force clean before testing 'qmk compile'
+        run: git clean -fdx
+
       - name: Test AVR build using 'qmk compile'
         run: nix-shell --run 'qmk compile -kb planck/rev5 -km default'
 
