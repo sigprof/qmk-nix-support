@@ -51,11 +51,14 @@ jobs:
       - name: Test Arm build using 'make'
         run: nix-shell --run 'make planck/rev6:default'
 
-      - name: Test 'qmk clean'
-        run: nix-shell --run 'qmk clean'
+      - name: Test 'make clean'
+        run: nix-shell --run 'make clean'
 
       - name: Test AVR build using 'qmk compile'
         run: nix-shell --run 'qmk compile -kb planck/rev5 -km default'
 
       - name: Test Arm build using 'qmk compile'
         run: nix-shell --run 'qmk compile -kb planck/rev6 -km default'
+
+      - name: Test 'qmk clean'
+        run: nix-shell --run 'qmk clean'
