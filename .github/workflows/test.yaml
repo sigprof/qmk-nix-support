@@ -9,14 +9,17 @@ jobs:
     strategy:
       matrix:
         source:
-          - { repo: "qmk/qmk_firmware", branch: "master" }
+          # { repo: "qmk/qmk_firmware", branch: "master" }
           - { repo: "sigprof/qmk_firmware", branch: "nix-shell-updates" }
         nixPath:
           - nixpkgs=channel:nixos-20.09
           # nixpkgs=channel:nixos-unstable
+        os:
+          # ubuntu-latest
+          - macos-latest
       fail-fast: false
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Install Nix
         uses: cachix/install-nix-action@v13
