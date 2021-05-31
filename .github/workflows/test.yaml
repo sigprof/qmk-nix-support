@@ -42,6 +42,9 @@ jobs:
       - name: Update submodules
         run: make git-submodule
 
+      - name: Build the Nix shell environment
+        run: nix-shell --run 'true'
+
       - name: Test AVR build using 'make'
         continue-on-error: true
         run: nix-shell --run 'make planck/rev5:default'
