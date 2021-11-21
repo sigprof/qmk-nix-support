@@ -1,3 +1,20 @@
+# This workflow attempts to test `shell.nix` in the specified forks and
+# branches of the `qmk_firmware` repository by trying to build some firmwares
+# using that environment.
+#
+# Expected repository secrets:
+#   - `CACHIX_SETTINGS_JSON`:
+#     A JSON object which contains the Cachix cache name under the `name` key:
+#         {"name": "CACHE-NAME"}
+#     This roundabout representation is used to keep the Cachix cache name
+#     intact in logs (normally GitHub will redact any string which matches a
+#     secret value, but with the added JSON encoding GitHub will not redact any
+#     data extracted from that JSON).
+#
+#   - `CACHIX_AUTH_TOKEN`:
+#     The Cachix auth token which grants write permissions to the cache
+#     specified in `CACHIX_SETTINGS_JSON`.
+
 name: Test Nix shell
 on:
   workflow_dispatch:
@@ -33,7 +50,7 @@ jobs:
       - name: Setup Cachix
         uses: cachix/cachix-action@v10
         with:
-          name: ${{ secrets.CACHIX_NAME }}
+          name: ${{ fromJSON(secrets.CACHIX_SETTINGS_JSON).name }}
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
 
       - name: Checkout the QMK source code
