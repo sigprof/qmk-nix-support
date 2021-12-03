@@ -30,6 +30,7 @@ jobs:
           - { repo: "sigprof/qmk_firmware", branch: "nix-shell-updates" }
         nixPath:
           - nixpkgs=channel:nixos-21.05
+          - nixpkgs=channel:nixos-21.11
           - nixpkgs=channel:nixos-unstable
         os:
           - ubuntu-latest
