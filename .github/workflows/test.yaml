@@ -55,7 +55,7 @@ jobs:
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
 
       - name: Checkout the QMK source code
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3.0.2
         with:
           repository: ${{ matrix.source.repo }}
           ref: ${{ matrix.source.branch }}
