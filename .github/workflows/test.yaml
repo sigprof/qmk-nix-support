@@ -65,7 +65,7 @@ jobs:
 
       - name: Build the Nix shell environment
         id: nix_shell
-        run: nix-shell --run 'true'
+        run: nix-shell --show-trace --run 'true'
 
       - name: Test AVR build using 'make'
         if: ${{ always() && (steps.nix_shell.outcome == 'success') }}
