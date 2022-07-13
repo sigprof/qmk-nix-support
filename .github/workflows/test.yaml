@@ -39,6 +39,9 @@ jobs:
       - name: Install Nix
         uses: cachix/install-nix-action@v16
         with:
+          # Nix >= 2.10.0 release binaries are broken on x86_64-darwin:
+          # https://github.com/NixOS/nix/issues/4758
+          install_url: https://releases.nixos.org/nix/nix-2.9.2/install
           # `nix-shell` gets `bashInteractive` from `<nixpkgs>`, so a valid
           # `NIX_PATH` is required (there is a fallback to whatever `bash`
           # binary is found in `$PATH`, but it might be a wrong version).
