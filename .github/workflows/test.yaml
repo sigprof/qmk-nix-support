@@ -28,14 +28,10 @@ jobs:
         source:
           - { repo: "qmk/qmk_firmware", branch: "master" }
           - { repo: "sigprof/qmk_firmware", branch: "nix-shell-updates" }
-        nixPath:
-          - nixpkgs=channel:nixos-21.05
-          - nixpkgs=channel:nixos-21.11
-          - nixpkgs=channel:nixos-unstable
         os:
           - ubuntu-latest
-          - macos-10.15
           - macos-11
+          - macos-12
       fail-fast: false
 
     runs-on: ${{ matrix.os }}
@@ -43,7 +39,10 @@ jobs:
       - name: Install Nix
         uses: cachix/install-nix-action@v17
         with:
-          nix_path: "${{ matrix.nixPath }}"
+          # `nix-shell` gets `bashInteractive` from `<nixpkgs>`, so a valid
+          # `NIX_PATH` is required (there is a fallback to whatever `bash`
+          # binary is found in `$PATH`, but it might be a wrong version).
+          nix_path: nixpkgs=channel:nixos-unstable
 
       - name: Show nixpkgs version
         run: nix-instantiate --eval -E '(import <nixpkgs> {}).lib.version'
@@ -66,7 +65,7 @@ jobs:
 
       - name: Build the Nix shell environment
         id: nix_shell
-        run: nix-shell --run 'true'
+        run: nix-shell --show-trace --run 'true'
 
       - name: Test AVR build using 'make'
         if: ${{ always() && (steps.nix_shell.outcome == 'success') }}
