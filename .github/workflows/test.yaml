@@ -30,7 +30,6 @@ jobs:
           - { repo: "sigprof/qmk_firmware", branch: "nix-shell-updates" }
         os:
           - ubuntu-latest
-          - macos-10.15
           - macos-11
       fail-fast: false
 
