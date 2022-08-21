@@ -27,7 +27,9 @@ jobs:
       matrix:
         source:
           - { repo: "qmk/qmk_firmware", branch: "master" }
+          - { repo: "qmk/qmk_firmware", branch: "develop" }
           - { repo: "sigprof/qmk_firmware", branch: "nix-shell-updates" }
+          - { repo: "sigprof/qmk_firmware", branch: "nix-shell-updates-develop" }
         os:
           - ubuntu-latest
           - macos-11
