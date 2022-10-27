@@ -50,7 +50,7 @@ jobs:
         run: nix-instantiate --eval -E '(import <nixpkgs> {}).lib.version'
 
       - name: Setup Cachix
-        uses: cachix/cachix-action@v10
+        uses: cachix/cachix-action@v12
         with:
           name: ${{ fromJSON(secrets.CACHIX_SETTINGS_JSON).name }}
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
