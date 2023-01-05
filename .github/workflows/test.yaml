@@ -62,12 +62,12 @@ jobs:
           ref: ${{ matrix.source.branch }}
           submodules: recursive
 
-      - name: Update submodules
-        run: make git-submodule
-
       - name: Build the Nix shell environment
         id: nix_shell
         run: nix-shell --show-trace --run 'true'
+
+      - name: Update submodules
+        run: nix-shell --run 'make git-submodule'
 
       - name: Test AVR build using 'make'
         if: ${{ always() && (steps.nix_shell.outcome == 'success') }}
