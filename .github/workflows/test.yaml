@@ -2,39 +2,106 @@
 # branches of the `qmk_firmware` repository by trying to build some firmwares
 # using that environment.
 #
-# Expected repository secrets:
-#   - `CACHIX_SETTINGS_JSON`:
-#     A JSON object which contains the Cachix cache name under the `name` key:
-#         {"name": "CACHE-NAME"}
-#     This roundabout representation is used to keep the Cachix cache name
-#     intact in logs (normally GitHub will redact any string which matches a
-#     secret value, but with the added JSON encoding GitHub will not redact any
-#     data extracted from that JSON).
+# Expected repository configuration variables:
+#   - `CACHIX_NAME`:
+#     The Cachix cache name.
 #
+# Expected repository secrets:
 #   - `CACHIX_AUTH_TOKEN`:
 #     The Cachix auth token which grants write permissions to the cache
-#     specified in `CACHIX_SETTINGS_JSON`.
+#     specified in `CACHIX_NAME`.
 
 name: Test Nix shell
 on:
   workflow_dispatch:
+    inputs:
+      source:
+        description: 'Branch (user[/repo]:branch)'
+        type: string
+        required: false
+      os:
+        description: 'Machine type'
+        type: string
+        required: false
   schedule:
     - cron: '35 4 * * *'
 
 jobs:
+  # The `setup` job determines the strategy for the real build job.
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    outputs:
+      strategy: ${{ steps.strategy.outputs.result }}
+    steps:
+      - id: strategy
+        name: Determine build strategy
+        uses: actions/github-script@v6.4.1
+        with:
+          script: |
+            // Default settings.
+            const defaultSource = [
+              { repo: "qmk/qmk_firmware", branch: "master" },
+              { repo: "qmk/qmk_firmware", branch: "develop" },
+              { repo: "sigprof/qmk_firmware", branch: "nix-shell-updates" },
+              { repo: "sigprof/qmk_firmware", branch: "nix-shell-updates-develop" },
+            ];
+            const defaultOS = [
+              "ubuntu-latest",
+              "macos-latest",
+            ];
+
+            // Read workflow inputs.
+            let inputSource = "";
+            let inputOS = "";
+            if (context.eventName == "workflow_dispatch") {
+              const payload = context.payload;
+              const inputs = payload && payload.inputs;
+              inputSource = inputs && inputs.source && inputs.source.trim() || "";
+              inputOS = inputs && inputs.os && inputs.os.trim() || "";
+            }
+
+            // Parse the `source` input.
+            let matrixSource = defaultSource;
+            if (inputSource != "") {
+              const sourceParts = inputSource.split(":", 2);
+              if (sourceParts.length == 2 ) {
+                let repoParts = sourceParts[0].split("/", 2);
+                if (repoParts.length == 1) {
+                  repoParts.push("qmk_firmware");
+                }
+                matrixSource = [
+                  { repo: repoParts.join("/"), branch: sourceParts[1] },
+                ];
+              }
+            }
+
+            // Parse the `os` input.
+            let matrixOS = defaultOS;
+            if (inputOS != "") {
+              matrixOS = [ inputOS ];
+            }
+
+            // Determine build strategy.
+            const strategy = {
+              "fail-fast": false,
+              "matrix": {
+                "source": matrixSource,
+                "os": matrixOS,
+              },
+            };
+
+            // Print the resulting strategy to the log.
+            core.startGroup("Job strategy:");
+            core.info(JSON.stringify(strategy, null, 2));
+            core.endGroup();
+
+            // Return the strategy as the step output in the JSON format.
+            return strategy;
+
   test:
-    strategy:
-      matrix:
-        source:
-          - { repo: "qmk/qmk_firmware", branch: "master" }
-          - { repo: "qmk/qmk_firmware", branch: "develop" }
-          - { repo: "sigprof/qmk_firmware", branch: "nix-shell-updates" }
-          - { repo: "sigprof/qmk_firmware", branch: "nix-shell-updates-develop" }
-        os:
-          - ubuntu-latest
-          - macos-11
-          - macos-12
-      fail-fast: false
+    needs: setup
+    strategy: ${{ fromJSON(needs.setup.outputs.strategy) }}
 
     runs-on: ${{ matrix.os }}
     steps:
@@ -52,7 +119,7 @@ jobs:
       - name: Setup Cachix
         uses: cachix/cachix-action@v12
         with:
-          name: ${{ fromJSON(secrets.CACHIX_SETTINGS_JSON).name }}
+          name: ${{ vars.CACHIX_NAME }}
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
 
       - name: Checkout the QMK source code
