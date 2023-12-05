@@ -106,7 +106,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Install Nix
-        uses: cachix/install-nix-action@v23
+        uses: cachix/install-nix-action@v24
         with:
           # `nix-shell` gets `bashInteractive` from `<nixpkgs>`, so a valid
           # `NIX_PATH` is required (there is a fallback to whatever `bash`
