@@ -48,6 +48,7 @@ jobs:
             ];
             const defaultOS = [
               "ubuntu-latest",
+              "macos-13",
               "macos-latest",
             ];
 
