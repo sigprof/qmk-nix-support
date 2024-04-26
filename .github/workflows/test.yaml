@@ -82,11 +82,30 @@ jobs:
               matrixOS = [ inputOS ];
             }
 
+            // Filter out nonexistent branches.
+            let filteredSource = [];
+            for (source of matrixSource) {
+              try {
+                branch = await github.rest.repos.getBranch(source);
+                if (branch.data.name == source.branch) {
+                  filteredSource.push(source);
+                } else {
+                  core.info(`Branch '${source.branch}' in '${source.owner}/${source.repo}' was renamed to '${branch.data.name}' - ignoring.`);
+                }
+              } catch (e) {
+                if (e.name === 'HttpError' && e.status === 404) {
+                  core.info(`Branch '${source.branch}' not found in '${source.owner}/${source.repo}'.`);
+                } else {
+                  throw e;
+                }
+              }
+            }
+
             // Determine build strategy.
             const strategy = {
               "fail-fast": false,
               "matrix": {
-                "source": matrixSource,
+                "source": filteredSource,
                 "os": matrixOS,
               },
             };
