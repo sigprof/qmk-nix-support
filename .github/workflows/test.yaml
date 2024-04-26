@@ -41,10 +41,10 @@ jobs:
           script: |
             // Default settings.
             const defaultSource = [
-              { repo: "qmk/qmk_firmware", branch: "master" },
-              { repo: "qmk/qmk_firmware", branch: "develop" },
-              { repo: "sigprof/qmk_firmware", branch: "nix-shell-updates" },
-              { repo: "sigprof/qmk_firmware", branch: "nix-shell-updates-develop" },
+              { owner: "qmk",     repo: "qmk_firmware", branch: "master" },
+              { owner: "qmk",     repo: "qmk_firmware", branch: "develop" },
+              { owner: "sigprof", repo: "qmk_firmware", branch: "nix-shell-updates" },
+              { owner: "sigprof", repo: "qmk_firmware", branch: "nix-shell-updates-develop" },
             ];
             const defaultOS = [
               "ubuntu-latest",
@@ -71,7 +71,7 @@ jobs:
                   repoParts.push("qmk_firmware");
                 }
                 matrixSource = [
-                  { repo: repoParts.join("/"), branch: sourceParts[1] },
+                  { owner: repoParts[0], repo: repoParts[1], branch: sourceParts[1] },
                 ];
               }
             }
@@ -125,7 +125,7 @@ jobs:
       - name: Checkout the QMK source code
         uses: actions/checkout@v4.1.1
         with:
-          repository: ${{ matrix.source.repo }}
+          repository: ${{ format('{0}/{1}', matrix.source.owner, matrix.source.repo) }}
           ref: ${{ matrix.source.branch }}
           submodules: recursive
 
